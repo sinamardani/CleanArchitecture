@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="TodoItems\Enums\" />
+    <Folder Include="TodoLists\ValueObjects\" />
   </ItemGroup>
 
 </Project>

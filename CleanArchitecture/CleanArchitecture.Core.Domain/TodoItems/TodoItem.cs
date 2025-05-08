@@ -1,10 +1,11 @@
 ﻿using CleanArchitecture.Core.Domain.Common;
 using CleanArchitecture.Core.Domain.TodoItems.Enums;
 using CleanArchitecture.Core.Domain.TodoItems.Events;
+using CleanArchitecture.Core.Domain.TodoLists;
 
 namespace CleanArchitecture.Core.Domain.TodoItems;
 
-public class TodoItem : BaseAuditTableEntity
+public sealed class TodoItem : BaseAuditTableEntity
 {
     public int ListId { get; set; }
 
@@ -30,4 +31,5 @@ public class TodoItem : BaseAuditTableEntity
             _done = value;
         }
     }
+    public TodoList List { get; set; } = null!;
 }
