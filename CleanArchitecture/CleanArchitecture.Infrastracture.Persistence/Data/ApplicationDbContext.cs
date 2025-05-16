@@ -5,6 +5,8 @@ using CleanArchitecture.Core.Domain.TodoItems;
 using CleanArchitecture.Core.Domain.TodoLists;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
 namespace CleanArchitecture.Infrastructure.Persistence.Data;
@@ -24,4 +26,5 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
+
 }

@@ -24,7 +24,6 @@ public class BaseAuditTableEntity<TKey> : BaseEntity<TKey>, IBaseAuditTableEntit
     [Column(TypeName = "datetime2")]
     public DateTime? DeletedOn { get; set; }
 
-    [Column(TypeName = "datetime2")]
     public Guid? DeletedBy { get; set; }
 
     public bool IsDelete { get; set; }

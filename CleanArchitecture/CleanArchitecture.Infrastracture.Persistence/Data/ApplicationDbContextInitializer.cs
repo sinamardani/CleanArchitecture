@@ -1,4 +1,5 @@
-﻿using CleanArchitecture.Core.Domain.ApplicationUsers;
+﻿using CleanArchitecture.Core.Domain.ApplicationRole;
+using CleanArchitecture.Core.Domain.ApplicationUsers;
 using CleanArchitecture.Core.Domain.Constants;
 using CleanArchitecture.Core.Domain.TodoItems;
 using CleanArchitecture.Core.Domain.TodoLists;
@@ -38,9 +39,9 @@ public  class ApplicationDbContextInitializer
     private readonly ILogger<ApplicationDbContextInitializer> _logger;
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
 
-    public ApplicationDbContextInitializer(ILogger<ApplicationDbContextInitializer> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+    public ApplicationDbContextInitializer(ILogger<ApplicationDbContextInitializer> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
     {
         _logger = logger;
         _context = context;
@@ -81,7 +82,12 @@ public  class ApplicationDbContextInitializer
 
         if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
         {
-            await _roleManager.CreateAsync(administratorRole);
+            await _roleManager.CreateAsync(new ApplicationRole()
+            {
+                Name = Roles.Administrator,
+                NormalizedName = Roles.Administrator.ToUpper(),
+                ConcurrencyStamp = Guid.NewGuid().ToString()
+            });
         }
 
         // Default users
