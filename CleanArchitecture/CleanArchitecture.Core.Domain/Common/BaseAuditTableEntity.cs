@@ -15,17 +15,17 @@ public class BaseAuditTableEntity<TKey> : BaseEntity<TKey>, IBaseAuditTableEntit
     public DateTime CreatedOn { get; set; }
 
     [Required]
-    public int CreatedBy { get; set; }
+    public Guid CreatedBy { get; set; }
 
     [Column(TypeName = "datetime2")]
     public DateTime? EditedOn { get; set; }
-    public int? EditedBy { get; set; }
+    public Guid? EditedBy { get; set; }
 
     [Column(TypeName = "datetime2")]
     public DateTime? DeletedOn { get; set; }
 
     [Column(TypeName = "datetime2")]
-    public int? DeletedBy { get; set; }
+    public Guid? DeletedBy { get; set; }
 
     public bool IsDelete { get; set; }
 }
