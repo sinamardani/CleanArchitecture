@@ -1,6 +1,8 @@
-﻿using CleanArchitecture.Domain.Entities;
+﻿using CleanArchitecture.Core.Domain.TodoItems;
+using CleanArchitecture.Core.Domain.TodoLists;
+using Mapster;
 
-namespace CleanArchitecture.Application.Common.Models;
+namespace CleanArchitecture.Core.Application.Common.Models;
 
 public class LookupDto
 {
@@ -8,12 +10,12 @@ public class LookupDto
 
     public string? Title { get; init; }
 
-    private class Mapping : Profile
+    private class Mapping : IRegister
     {
-        public Mapping()
+        public void Register(TypeAdapterConfig config)
         {
-            CreateMap<TodoList, LookupDto>();
-            CreateMap<TodoItem, LookupDto>();
+            config.NewConfig<TodoList, LookupDto>();
+            config.NewConfig<TodoItem, LookupDto>();
         }
     }
 }

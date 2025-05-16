@@ -1,4 +1,4 @@
-﻿using CleanArchitecture.Application.Common.Models;
+﻿using CleanArchitecture.Core.Application.Common.Models;
 
 namespace CleanArchitecture.Core.Application.TodoLists.Queries.GetTodos;
 

@@ -1,6 +1,6 @@
-﻿using CleanArchitecture.Application.Common.Models;
-using CleanArchitecture.Core.Application.Common.Interfaces.Data;
+﻿using CleanArchitecture.Core.Application.Common.Interfaces.Data;
 using CleanArchitecture.Core.Application.Common.Interfaces.Messaging.Command;
+using CleanArchitecture.Core.Application.Common.Models;
 using CleanArchitecture.Core.Application.Common.Models.Results;
 using CleanArchitecture.Core.Domain.Common.Enum;
 using Mapster;

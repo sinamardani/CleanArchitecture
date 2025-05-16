@@ -27,5 +27,6 @@ public sealed class UpdateTodoListCommandHandler(IApplicationDbContext context) 
         entity.Title = request.Title;
 
         await context.SaveChangesAsync(cancellationToken);
+        return new CrudResult(CrudStatus.Succeeded, "با موفقیت ویرایش شد");
     }
 }
