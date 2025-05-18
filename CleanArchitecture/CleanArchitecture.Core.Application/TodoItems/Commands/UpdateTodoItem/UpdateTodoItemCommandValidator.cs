@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace CleanArchitecture.Core.Application.TodoItems.Commands.UpdateTodoItem;
 
-public sealed class UpdateTodoItemCommandValidator : AbstractValidator<CreateTodoItemCommand>
+public sealed class UpdateTodoItemCommandValidator : AbstractValidator<UpdateTodoIemCommand>
 {
     public UpdateTodoItemCommandValidator()
     {

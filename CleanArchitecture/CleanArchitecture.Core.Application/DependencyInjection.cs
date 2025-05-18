@@ -4,6 +4,7 @@ using MapsterMapper;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using FluentValidation;
 
 namespace CleanArchitecture.Core.Application;
 
@@ -19,6 +20,8 @@ public static class DependencyInjection
         service.AddSingleton(config);
         service.AddScoped<IMapper, ServiceMapper>();
         #endregion
+
+        service.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         service.AddMediatR(configuration =>
         {
