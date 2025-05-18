@@ -1,41 +1,44 @@
-﻿using FluentValidation;
+﻿using CleanArchitecture.Core.Application.Common.Models.Results;
+using CleanArchitecture.Core.Domain.Common.Enum;
+using FluentValidation;
 using MediatR;
 using ValidationException = CleanArchitecture.Core.Application.Common.Exceptions.ValidationException;
 
 namespace CleanArchitecture.Core.Application.Common.Behaviours;
 
-public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
+    where TResponse : BaseResult, new()
 {
-    private readonly IEnumerable<IValidator<TRequest>> _validators;
 
-    public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators)
-    {
-        _validators = validators;
-    }
 
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        if (_validators.Any())
+        if (validators.Any())
         {
             var context = new ValidationContext<TRequest>(request);
 
-            var validationResults = await Task.WhenAll(
-                _validators.Select(v => v.ValidateAsync(context, cancellationToken))
-            );
+            var validationResult =
+                await Task.WhenAll(validators
+                    .Select(v => v.ValidateAsync(context, cancellationToken)));
 
-            var failures = validationResults
+            var failures = validationResult
+                .Where(r => r.Errors.Any())
                 .SelectMany(r => r.Errors)
-                .Where(f => f != null)
-                .ToList();
+                .Select(s => new CrudMessage()
+                {
+                    Message = s.ErrorMessage,
+                    PropertyName = s.PropertyName
+                }).ToList();
 
-            if (failures.Count != 0)
-                throw new ValidationException(failures);
+            if (failures.Any())
+                return new TResponse
+                {
+                    Status = CrudStatus.InputNotValid,
+                    Messages = failures
+                };
         }
 
-        return await next();
+        return await next(cancellationToken);
     }
 }
