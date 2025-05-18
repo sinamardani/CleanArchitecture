@@ -2,4 +2,4 @@
 
 namespace CleanArchitecture.Core.Domain.TodoItems.Events;
 
-public sealed record TodoItemDeletedEvent() : BaseEvent;
+public sealed record TodoItemDeletedEvent(TodoItem Item) : BaseEvent;
