@@ -30,18 +30,17 @@ else
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseSwagger();
-
-app.UseSwaggerUI(c =>
+app.UseOpenApi();
+app.UseSwaggerUi(settings =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API V1");
+    settings.Path = "/swagger";
 });
+
 
 app.UseExceptionHandler(options => { });
 app.Map("/", () => Results.Redirect("/swagger"));
-
 app.MapEndpoints();
+
 
 app.Run();
 

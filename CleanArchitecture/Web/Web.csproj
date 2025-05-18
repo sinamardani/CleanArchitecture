@@ -22,13 +22,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CleanArchitecture.Core.Application\CleanArchitecture.Core.Application.csproj" />
     <ProjectReference Include="..\CleanArchitecture.Infrastracture.Persistence\CleanArchitecture.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\CleanArchitecture.Infrastructure.Resources\CleanArchitecture.Infrastructure.Resources.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>
