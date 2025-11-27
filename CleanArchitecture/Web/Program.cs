@@ -1,7 +1,11 @@
+using Application;
+using Persistence;
 using Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplication();
+builder.Services.AddPersistence();
 builder.Services.AddWebServices();
 
 var app = builder.Build();
