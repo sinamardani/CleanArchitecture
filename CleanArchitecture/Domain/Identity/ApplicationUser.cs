@@ -1,15 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Commons;
 using Domain.Commons.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
-namespace Domain.Commons;
+namespace Domain.Identity;
 
-public abstract class BaseEntity<TKey> : IBaseEntity<TKey>, IHasDomainEvents
+public class ApplicationUser : IdentityUser<int>, IHasDomainEvents
 {
-    public TKey Id { get; set; } = default!;
     private readonly List<BaseEvent> _domainEvents = new();
 
     [NotMapped]
     public IReadOnlyCollection<BaseEvent> DomainEvents => _domainEvents.AsReadOnly();
+
     public void AddDomainEvent(BaseEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
@@ -26,7 +28,3 @@ public abstract class BaseEntity<TKey> : IBaseEntity<TKey>, IHasDomainEvents
     }
 }
 
-public abstract class BaseEntity : BaseEntity<int>
-{
-
-}

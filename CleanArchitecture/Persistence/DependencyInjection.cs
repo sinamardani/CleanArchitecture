@@ -1,22 +1,46 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Application.Commons.Interfaces.Data;
+using Domain.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Persistence.Data;
 using Persistence.Data.Interceptors;
 
 namespace Persistence;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services)
+    public static IServiceCollection AddPersistence(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         services.AddScoped<AuditTableEntityInterceptor>();
         services.AddScoped<DispatchDomainEventsInterceptor>();
 
-        return services;
-    }
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            var auditInterceptor = sp.GetRequiredService<AuditTableEntityInterceptor>();
+            var domainEventsInterceptor = sp.GetRequiredService<DispatchDomainEventsInterceptor>();
 
-    public static DbContextOptionsBuilder AddAuditInterceptor(this DbContextOptionsBuilder optionsBuilder, IServiceProvider serviceProvider)
-    {
-        var interceptor = serviceProvider.GetRequiredService<AuditTableEntityInterceptor>();
-        return optionsBuilder.AddInterceptors(interceptor);
+            options.UseSqlServer(configuration.GetConnectionString("CleanArchitectureDb"))
+                   .AddInterceptors(auditInterceptor, domainEventsInterceptor);
+        });
+
+        services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 6;
+            options.User.RequireUniqueEmail = true;
+        })
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        return services;
     }
 }

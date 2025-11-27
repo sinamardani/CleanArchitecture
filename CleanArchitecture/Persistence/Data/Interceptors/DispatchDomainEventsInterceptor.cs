@@ -1,4 +1,4 @@
-using Domain.Commons;
+using Domain.Commons.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -29,8 +29,8 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
 
         var entitiesWithEvents = context.ChangeTracker
             .Entries()
-            .Where(e => e.Entity is BaseEntity)
-            .Select(e => (BaseEntity)e.Entity)
+            .Where(e => e.Entity is IHasDomainEvents)
+            .Select(e => (IHasDomainEvents)e.Entity)
             .Where(e => e.DomainEvents.Any())
             .ToList();
 
