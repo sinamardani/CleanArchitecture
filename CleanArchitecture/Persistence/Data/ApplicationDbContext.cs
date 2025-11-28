@@ -5,7 +5,6 @@ using Domain.TodoLists;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Persistence.Data.Configurations;
 using Persistence.Data.Extensions;
 
 namespace Persistence.Data;
