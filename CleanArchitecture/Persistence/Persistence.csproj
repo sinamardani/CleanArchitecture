@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Interceptors\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

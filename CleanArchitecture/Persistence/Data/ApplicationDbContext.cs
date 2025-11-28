@@ -19,10 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.ApplyConfiguration(new TodoItemConfiguration());
-        modelBuilder.ApplyConfiguration(new TodoListConfiguration());
-
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         modelBuilder.ApplySoftDeleteGlobalQueryFilter();
     }
 }
