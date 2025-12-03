@@ -1,6 +1,7 @@
 using Application;
 using Persistence;
 using Web;
+using Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddWebServices();
 
 var app = builder.Build();
+
+await app.InitializeDatabaseAsync();
 
 if (app.Environment.IsDevelopment())
 {

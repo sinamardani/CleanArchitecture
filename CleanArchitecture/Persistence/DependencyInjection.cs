@@ -22,6 +22,7 @@ public static class DependencyInjection
     {
         service.AddScoped<AuditTableEntityInterceptor>();
         service.AddScoped<DispatchDomainEventsInterceptor>();
+        service.AddScoped<ApplicationDbContextInitializer>();
 
         return service;
     }
