@@ -1,4 +1,4 @@
-using Application.Commons.Interfaces;
+using Application.Commons.Interfaces.Data;
 using System.Security.Claims;
 
 namespace Web.Commons.Services;
