@@ -1,7 +1,7 @@
 using Application.Commons.Interfaces.Data;
 using System.Security.Claims;
 
-namespace Web.Commons.Services;
+namespace Web.Services;
 
 public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
