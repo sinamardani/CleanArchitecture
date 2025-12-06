@@ -2,6 +2,6 @@
 
 public interface ISoftDelete
 {
-    public DateTimeOffset DeletedOn { get; set; }
-    public int DeletedBy { get; set; }
+    public DateTimeOffset? DeletedOn { get; set; }
+    public int? DeletedBy { get; set; }
 }

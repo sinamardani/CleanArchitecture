@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Contexts;
 using NSwag.Generation.Processors;
+using Application.Commons.Interfaces.Data;
+using Web.Services;
 
 namespace Web;
 
@@ -10,20 +12,26 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddWebServices(this IServiceCollection services) =>
         services
+            .AddServices()
             .AddSwagger();
+
+    private static IServiceCollection AddServices(this IServiceCollection service)
+    {
+        return service
+            .AddHttpContextAccessor()
+            .AddScoped<ICurrentUserService, CurrentUserService>();
+    }
 
     private static IServiceCollection AddSwagger(this IServiceCollection service)
     {
-        service.AddEndpointsApiExplorer();
-
-        service.AddOpenApiDocument(option =>
-        {
-            option.Version = "V1.0.0";
-            option.Title = "CleanArchitecture API";
-            option.OperationProcessors.Add(new FormDataOperationProcessor());
-        });
-
-        return service;
+        return service
+            .AddEndpointsApiExplorer()
+            .AddOpenApiDocument(option =>
+            {
+                option.Version = "V1.0.0";
+                option.Title = "CleanArchitecture API";
+                option.OperationProcessors.Add(new FormDataOperationProcessor());
+            });
     }
 
     private class FormDataOperationProcessor : IOperationProcessor

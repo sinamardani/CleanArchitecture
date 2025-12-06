@@ -3,7 +3,7 @@ using Domain.Commons.Interfaces;
 
 namespace Domain.Commons;
 
-public abstract class BaseEntity<TKey> : IBaseEntity<TKey>
+public abstract class BaseEntity<TKey> : IBaseEntity<TKey>, IHasDomainEvents
 {
     public TKey Id { get; set; } = default!;
     private readonly List<BaseEvent> _domainEvents = new();
