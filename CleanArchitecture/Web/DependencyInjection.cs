@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
-using Application.Commons.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Contexts;
 using NSwag.Generation.Processors;
-using Web.Commons.Services;
+using Application.Commons.Interfaces.Data;
+using Web.Services;
 
 namespace Web;
 
