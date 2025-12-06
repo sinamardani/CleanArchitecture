@@ -23,10 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{D0D6D65D-2535-42B0-85C7-B3CA2D943B64}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "..\..\AspireTest\AppHost\AppHost.csproj", "{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDefaults", "..\..\AspireTest\ServiceDefaults\ServiceDefaults.csproj", "{24A73E3E-9355-EF66-8497-F18A20D4846E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,14 +49,6 @@ Global
 		{D0D6D65D-2535-42B0-85C7-B3CA2D943B64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0D6D65D-2535-42B0-85C7-B3CA2D943B64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0D6D65D-2535-42B0-85C7-B3CA2D943B64}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{24A73E3E-9355-EF66-8497-F18A20D4846E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{24A73E3E-9355-EF66-8497-F18A20D4846E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{24A73E3E-9355-EF66-8497-F18A20D4846E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{24A73E3E-9355-EF66-8497-F18A20D4846E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,8 +62,6 @@ Global
 		{1F50CB0F-849C-4599-8C73-6A12261E8756} = {3BFDBC92-F2B0-4772-9FAE-B2643F3AF102}
 		{10A68DF2-79BA-4DED-AB1B-965909180BA6} = {AED6AFEB-4196-468D-8EAA-E16A31656599}
 		{D0D6D65D-2535-42B0-85C7-B3CA2D943B64} = {3BFDBC92-F2B0-4772-9FAE-B2643F3AF102}
-		{AEA58E5B-B209-97FC-B86D-C5D4F83C03F2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
-		{24A73E3E-9355-EF66-8497-F18A20D4846E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F44F7F4-6D38-4195-9AFC-97FD9B4141F8}
