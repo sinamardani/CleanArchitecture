@@ -8,6 +8,10 @@ using Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+#if (UseAspire)
+builder.AddServiceDefaults();
+#endif
+
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddWebServices();
@@ -25,6 +29,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+#if (UseAspire)
+app.MapDefaultEndpoints();
+#endif
 
 app.UseExceptionHandler(appError =>
 {
