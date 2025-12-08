@@ -1,8 +1,12 @@
-using Aspire.Hosting;
-using Projects;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
-var web = builder.AddProject<Projects.Web>("web");
+var sqlServer = builder.AddSqlServer("sqlserver")
+    .WithDataVolume();
+
+var db = sqlServer.AddDatabase("CleanArchitectureDb");
+
+builder.AddProject<Projects.Web>("web")
+   .WithReference(db)
+   .WaitFor(db);
 
 builder.Build().Run();
