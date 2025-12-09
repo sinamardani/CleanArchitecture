@@ -13,9 +13,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
-builder.Services.AddHealthChecks()
-    .AddDatabaseHealthCheck<ApplicationDbContext>();
-
 builder.Services.AddWebServices();
 
 var app = builder.Build();
