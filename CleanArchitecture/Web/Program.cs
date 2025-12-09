@@ -1,19 +1,21 @@
 using Application;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Persistence;
+using Persistence.Data;
 using Web;
 using Web.Extensions;
 using Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-#if (UseAspire)
 builder.AddServiceDefaults();
-#endif
-
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddHealthChecks()
+    .AddDatabaseHealthCheck<ApplicationDbContext>();
+
 builder.Services.AddWebServices();
 
 var app = builder.Build();
@@ -29,9 +31,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-#if (UseAspire)
 app.MapDefaultEndpoints();
-#endif
 
 app.UseExceptionHandler(appError =>
 {

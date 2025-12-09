@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -70,6 +68,12 @@ public static class Extensions
             });
 
         return builder;
+    }
+
+    public static IHealthChecksBuilder AddDatabaseHealthCheck<TContext>(this IHealthChecksBuilder builder)
+        where TContext : DbContext
+    {
+        return builder.AddDbContextCheck<TContext>(typeof(TContext).Name, tags: new[] { "ready" });
     }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
