@@ -1,4 +1,5 @@
 using Application;
+using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Persistence;
@@ -8,8 +9,10 @@ using Web.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices();
 
 var app = builder.Build();
@@ -25,6 +28,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapDefaultEndpoints();
 
 app.UseExceptionHandler(appError =>
 {
