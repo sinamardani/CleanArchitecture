@@ -1,7 +1,5 @@
 using Application;
 using Infrastructure;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Persistence;
 using Web;
 using Web.Extensions;
@@ -29,29 +27,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapDefaultEndpoints();
-
-app.UseExceptionHandler(appError =>
-{
-    appError.Run(async context =>
-    {
-        var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
-        var exception = exceptionFeature?.Error;
-
-        var problem = new ProblemDetails
-        {
-            Title = "An unexpected error occurred",
-            Detail = exception?.Message,
-            Status = StatusCodes.Status500InternalServerError,
-            Instance = context.Request.Path
-        };
-
-        context.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/problem+json";
-        await context.Response.WriteAsJsonAsync(problem);
-    });
-});
-
-
+app.UseGlobalExceptionHandler();
 app.MapEndpoints();
 
 app.MapGet("/", () => Results.Redirect("/swagger"));

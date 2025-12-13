@@ -43,7 +43,7 @@ public static class Extensions
             logging.IncludeScopes = true;
         });
 
-        var otlpEndpoint = builder.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] 
+        var otlpEndpoint = builder.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"]
             ?? builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
 
         builder.Services.AddOpenTelemetry()
@@ -61,7 +61,9 @@ public static class Extensions
             .WithTracing(tracing =>
             {
                 tracing.AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation();
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation()
+                    .AddRedisInstrumentation();
 
                 if (!string.IsNullOrWhiteSpace(otlpEndpoint))
                 {
