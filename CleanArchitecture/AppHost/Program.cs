@@ -23,6 +23,6 @@ builder.AddProject<Projects.Web>("web")
    .WithReference(db)
    .WithReference(redis)
    .WithReference(loggingDb)
-   .WaitFor(db);
+   .WaitFor(sqlServer);
 
 builder.Build().Run();
