@@ -37,6 +37,7 @@ This project implements Clean Architecture with clear separation of concerns acr
 - ✅ **Result Pattern** - Consistent API response pattern with CrudResult
 - ✅ **Endpoint Groups** - Organized API endpoints using endpoint groups
 - ✅ **Database Initialization** - Automatic database seeding and migration support
+- ✅ **Custom Logging Service** - Structured logging to SQL Server with Serilog, including HTTP context, IP address, user agent, and more
 
 ## 🛠️ Technologies
 
@@ -62,6 +63,10 @@ This project implements Clean Architecture with clear separation of concerns acr
 - **.NET Aspire 13.0.2** - Cloud-native orchestration
 - **AspNetCore.HealthChecks.Redis 9.0.0** - Redis health checks
 - **Microsoft.Extensions.Caching.StackExchangeRedis 9.0.0** - Redis caching
+- **Serilog 4.3.0** - Structured logging framework
+- **Serilog.Sinks.Console 6.1.1** - Console logging sink
+- **Serilog.Sinks.MSSqlServer 9.0.2** - SQL Server logging sink
+- **Microsoft.AspNetCore.Http.Abstractions** - HTTP context access
 
 ### ServiceDefaults
 - **OpenTelemetry.Exporter.OpenTelemetryProtocol 1.9.0** - OTLP exporter
@@ -130,6 +135,8 @@ CleanArchitecture/
 │           └── TodoItemCreatedEventHandler.cs
 │
 ├── Infrastructure/                   # Infrastructure layer
+│   ├── Services/                     # Infrastructure services
+│   │   └── LogService.cs           # Custom logging service with Serilog
 │   └── DependencyInjection.cs      # Infrastructure DI configuration
 │
 ├── Persistence/                      # Data access layer
@@ -199,6 +206,7 @@ CleanArchitecture/
    {
      "ConnectionStrings": {
        "CleanArchitectureDb": "Server=localhost;Database=CleanArchitectureDb;User Id=sa;Password=YourPassword;MultipleActiveResultSets=true;TrustServerCertificate=True",
+       "LoggingDb": "Server=localhost;Database=LoggingDb;User Id=sa;Password=YourPassword;MultipleActiveResultSets=true;TrustServerCertificate=True",
        "Redis": "localhost:6379"
      }
    }
@@ -234,7 +242,7 @@ This will:
 
 The AppHost manages two databases:
 - **CleanArchitectureDb**: Main application database
-- **LoggingDb**: Logging database (if configured)
+- **LoggingDb**: Logging database for structured logs (automatically created)
 
 ### Option 2: Running Web API Directly
 
@@ -308,6 +316,68 @@ OpenTelemetry is configured in `ServiceDefaults/Extensions.cs`. The OTLP endpoin
 
 - Environment variable: `DOTNET_DASHBOARD_OTLP_ENDPOINT_URL`
 - Configuration: `OTEL_EXPORTER_OTLP_ENDPOINT`
+
+### Logging Configuration
+
+The application includes a custom `LogService` that uses Serilog to write structured logs to SQL Server. The logging service automatically captures:
+
+**Standard Serilog Fields:**
+- `Id` - Unique log entry identifier
+- `Message` - Log message text
+- `MessageTemplate` - Message template
+- `Level` - Log level (Verbose, Debug, Information, Warning, Error, Fatal)
+- `TimeStamp` - Log timestamp
+- `Exception` - Exception details (if applicable)
+- `Properties` - Additional properties as JSON
+
+**Custom Fields:**
+- `UserId` - Current user ID (if authenticated)
+- `RequestPath` - HTTP request path
+- `HttpMethod` - HTTP method (GET, POST, etc.)
+- `IPAddress` - Client IP address (supports X-Forwarded-For header)
+- `UserAgent` - Browser/client user agent
+- `Duration` - Request duration in milliseconds
+- `Source` - Source class/method name
+- `MachineName` - Server/machine name
+- `Environment` - Environment name (Development, Production, etc.)
+
+**Configuration:**
+
+The `LogService` is registered as a Singleton in `Infrastructure/DependencyInjection.cs`. The logging table (`Logs`) is automatically created when the first log is written (`AutoCreateSqlTable = true`).
+
+**Usage:**
+
+```csharp
+public class MyService
+{
+    private readonly ILogService _logService;
+    
+    public MyService(ILogService logService)
+    {
+        _logService = logService;
+    }
+    
+    public void DoSomething()
+    {
+        _logService.DbLog("User performed action", LogLevel.Information);
+        _logService.ConsoleLog("Debug information", LogLevel.Debug);
+    }
+}
+```
+
+**Connection String:**
+
+Add the `LoggingDb` connection string to `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "LoggingDb": "Server=localhost;Database=LoggingDb;User Id=sa;Password=YourPassword;MultipleActiveResultSets=true;TrustServerCertificate=True"
+  }
+}
+```
+
+If the connection string is not provided or connection fails, the service falls back to console logging.
 
 ## 🏛️ Architecture Patterns
 
@@ -422,6 +492,20 @@ Entities inheriting from `BaseAuditTableEntity` support soft delete. When an ent
 The `ICurrentUserService` interface provides access to the current user context:
 - `UserId`: Current user ID
 - Used by `AuditTableEntityInterceptor` to set audit fields
+
+### Logging Service
+
+The `ILogService` interface provides structured logging capabilities:
+- `DbLog(string message, LogLevel level)`: Writes logs to SQL Server database with automatic context enrichment
+- `ConsoleLog(string message, LogLevel level)`: Writes logs to console
+
+The service automatically captures:
+- HTTP request information (path, method, IP address, user agent)
+- Source class/method name
+- Machine name and environment
+- User ID (when available)
+
+Logs are stored in the `Logs` table in the `LoggingDb` database. The table is automatically created on first use.
 
 ## 🔍 Health Checks
 
