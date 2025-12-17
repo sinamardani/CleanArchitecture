@@ -38,6 +38,7 @@ This project implements Clean Architecture with clear separation of concerns acr
 - ✅ **Endpoint Groups** - Organized API endpoints using endpoint groups
 - ✅ **Database Initialization** - Automatic database seeding and migration support
 - ✅ **Custom Logging Service** - Structured logging to SQL Server with Serilog, including HTTP context, IP address, user agent, and more
+- ✅ **Unit Testing** - Comprehensive unit test infrastructure with xUnit, FluentAssertions, and Moq, organized in Feature-Based structure
 
 ## 🛠️ Technologies
 
@@ -67,6 +68,13 @@ This project implements Clean Architecture with clear separation of concerns acr
 - **Serilog.Sinks.Console 6.1.1** - Console logging sink
 - **Serilog.Sinks.MSSqlServer 9.0.2** - SQL Server logging sink
 - **Microsoft.AspNetCore.Http.Abstractions** - HTTP context access
+
+### Testing
+- **xUnit 2.9.2** - Unit testing framework
+- **FluentAssertions 7.0.0** - Fluent assertion library for readable test assertions
+- **Moq 4.20.72** - Mocking framework for unit tests
+- **Microsoft.EntityFrameworkCore.InMemory 9.0.11** - In-memory database provider for testing
+- **coverlet.collector 6.0.2** - Code coverage collection
 
 ### ServiceDefaults
 - **OpenTelemetry.Exporter.OpenTelemetryProtocol 1.9.0** - OTLP exporter
@@ -171,9 +179,36 @@ CleanArchitecture/
 ├── ServiceDefaults/                  # Shared service defaults
 │   └── Extensions.cs                # Service configuration extensions
 │
-└── AppHost/                          # .NET Aspire orchestration
-    ├── Program.cs                   # Aspire host configuration
-    └── appsettings.json            # Aspire configuration
+├── AppHost/                          # .NET Aspire orchestration
+│   ├── Program.cs                   # Aspire host configuration
+│   └── appsettings.json            # Aspire configuration
+│
+└── tests/                            # Unit test projects (Feature-Based structure)
+    ├── Domain.UnitTests/            # Domain layer unit tests
+    │   ├── TodoItems/               # TodoItem domain tests
+    │   │   └── TodoItemTests.cs
+    │   └── TodoLists/               # TodoList domain tests
+    │       ├── TodoListTests.cs
+    │       └── ValueObjects/        # Value object tests
+    │           └── ColourTests.cs
+    ├── Application.UnitTests/        # Application layer unit tests
+    │   ├── TodoItems/               # TodoItem application tests
+    │   │   ├── Commands/            # Command handler tests
+    │   │   ├── Queries/             # Query handler tests
+    │   │   └── Validators/          # Validator tests
+    │   └── TodoLists/               # TodoList application tests
+    │       ├── Commands/            # Command handler tests
+    │       ├── Queries/             # Query handler tests
+    │       └── Validators/          # Validator tests
+    ├── Infrastructure.UnitTests/     # Infrastructure layer unit tests
+    │   └── Services/                # Service tests
+    │       └── LogServiceTests.cs
+    ├── Persistence.UnitTests/        # Persistence layer unit tests
+    │   └── Data/                    # DbContext tests
+    │       ├── ApplicationDbContextTests.cs
+    │       ├── Configurations/      # Configuration tests
+    │       └── Interceptors/        # Interceptor tests
+    └── README.md                     # Unit tests documentation
 ```
 
 ## 🚀 Getting Started
@@ -464,6 +499,7 @@ This demonstrates:
 - API endpoints with endpoint groups
 - Pagination support
 - Soft delete functionality
+- **Comprehensive unit testing** with Feature-Based organization (51 tests covering all layers)
 
 ## 📦 Key Components
 
@@ -562,6 +598,7 @@ For custom Docker deployment:
 7. **Create EF Core Configuration** in `Persistence/Data/Configurations/`
 8. **Create Endpoints** in `Web/Endpoints/{Feature}.cs`
 9. **Register Endpoints** in `Web/Infrastructure/WebApplicationExtensions.cs`
+10. **Create Unit Tests** following the Feature-Based structure in `tests/`
 
 ### Running Migrations
 
@@ -570,6 +607,63 @@ cd CleanArchitecture/Web
 dotnet ef migrations add MigrationName --project ../Persistence
 dotnet ef database update --project ../Persistence
 ```
+
+### Unit Testing
+
+The project includes comprehensive unit test infrastructure organized in a **Feature-Based** structure. Tests are separated by layer:
+
+#### Test Projects
+
+- **Domain.UnitTests** - Tests for domain entities, value objects, and domain logic
+- **Application.UnitTests** - Tests for command handlers, query handlers, validators, and event handlers
+- **Infrastructure.UnitTests** - Tests for infrastructure services
+- **Persistence.UnitTests** - Tests for DbContext, configurations, and interceptors
+
+#### Running Tests
+
+```bash
+# Run all tests
+dotnet test CleanArchitecture/CleanArchitecture.sln
+
+# Run specific test project
+dotnet test CleanArchitecture/tests/Domain.UnitTests/Domain.UnitTests.csproj
+dotnet test CleanArchitecture/tests/Application.UnitTests/Application.UnitTests.csproj
+dotnet test CleanArchitecture/tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
+dotnet test CleanArchitecture/tests/Persistence.UnitTests/Persistence.UnitTests.csproj
+
+# Run with detailed output
+dotnet test CleanArchitecture/CleanArchitecture.sln --verbosity normal
+```
+
+#### Test Statistics
+
+The project currently includes:
+- **Domain Tests**: 16 tests covering entities, value objects, and domain events
+- **Application Tests**: 26 tests covering commands, queries, and validators
+- **Infrastructure Tests**: 4 tests covering infrastructure services
+- **Persistence Tests**: 5 tests covering DbContext operations
+
+**Total: 51 unit tests** with comprehensive coverage of core functionality.
+
+#### Writing Tests
+
+Tests follow a Feature-Based organization where each feature has its own folder structure:
+
+```
+tests/
+├── Domain.UnitTests/
+│   └── {FeatureName}/
+│       ├── {Entity}Tests.cs
+│       └── ValueObjects/
+│           └── {ValueObject}Tests.cs
+└── Application.UnitTests/
+    └── {FeatureName}/
+        ├── Commands/
+        ├── Queries/
+        └── Validators/
+```
+
+For detailed testing guidelines and examples, see `tests/README.md`.
 
 ## 🤝 Contributing
 
