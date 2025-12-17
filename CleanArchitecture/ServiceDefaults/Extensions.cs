@@ -1,32 +1,30 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Text.Json;
+using Microsoft.Extensions.Hosting;
 
-namespace Microsoft.Extensions.Hosting;
+namespace ServiceDefaults;
 
 public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
         builder.ConfigureOpenTelemetry();
-
         builder.Services.AddServiceDiscovery();
-
         builder.Services.ConfigureHttpClientDefaults(http =>
         {
             http.AddStandardResilienceHandler();
             http.AddServiceDiscovery();
         });
-
         builder.Services.AddHealthChecks();
-
         builder.Services.Configure<HealthCheckOptions>(options =>
         {
             options.AllowCachingResponses = false;
@@ -78,22 +76,7 @@ public static class Extensions
     {
         var healthCheckOptions = new HealthCheckOptions
         {
-            ResponseWriter = async (context, report) =>
-            {
-                context.Response.ContentType = "application/json";
-                var result = System.Text.Json.JsonSerializer.Serialize(new
-                {
-                    status = report.Status.ToString(),
-                    checks = report.Entries.Select(entry => new
-                    {
-                        name = entry.Key,
-                        status = entry.Value.Status.ToString(),
-                        exception = entry.Value.Exception?.Message,
-                        duration = entry.Value.Duration.ToString()
-                    })
-                });
-                await context.Response.WriteAsync(result);
-            }
+            ResponseWriter = WriteHealthCheckResponse
         };
 
         app.MapHealthChecks("/health", healthCheckOptions);
@@ -109,5 +92,48 @@ public static class Extensions
         });
 
         return app;
+    }
+
+    public static WebApplication UseGlobalExceptionHandler(this WebApplication app)
+    {
+        app.UseExceptionHandler(appError =>
+        {
+            appError.Run(async context =>
+            {
+                var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                var exception = exceptionFeature?.Error;
+
+                var problem = new ProblemDetails
+                {
+                    Title = "An unexpected error occurred",
+                    Detail = exception?.Message,
+                    Status = StatusCodes.Status500InternalServerError,
+                    Instance = context.Request.Path
+                };
+
+                context.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
+                context.Response.ContentType = "application/problem+json";
+                await context.Response.WriteAsJsonAsync(problem);
+            });
+        });
+
+        return app;
+    }
+
+    private static async Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
+    {
+        context.Response.ContentType = "application/json";
+        var result = JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(entry => new
+            {
+                name = entry.Key,
+                status = entry.Value.Status.ToString(),
+                exception = entry.Value.Exception?.Message,
+                duration = entry.Value.Duration.ToString()
+            })
+        });
+        await context.Response.WriteAsync(result);
     }
 }
