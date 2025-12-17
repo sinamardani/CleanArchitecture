@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using Application.Commons.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Commons.Behaviours;
 
-public class PerformanceBehaviour<TRequest, TResponse>(ILogger<PerformanceBehaviour<TRequest, TResponse>> logger)
+public class PerformanceBehaviour<TRequest, TResponse>(ILogService logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
@@ -24,11 +25,9 @@ public class PerformanceBehaviour<TRequest, TResponse>(ILogger<PerformanceBehavi
         {
             var requestName = typeof(TRequest).Name;
 
-            logger.LogWarning(
-                "Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@Request}",
-                requestName,
-                elapsedMilliseconds,
-                request);
+            logger.DbLog(
+                $"Long Running Request: {requestName} ({elapsedMilliseconds} milliseconds) {@request}",
+                LogLevel.Warning);
         }
 
         return response;
