@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <Folder Include="Commons\Behaviours\" />
+    <Folder Include="Commons\Interfaces\Authentication\" />
   </ItemGroup>
 
 </Project>

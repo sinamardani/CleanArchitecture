@@ -12,7 +12,7 @@ builder.AddServiceDefaults();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddWebServices();
+builder.Services.AddWebServices(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
@@ -27,6 +27,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapDefaultEndpoints();
 app.UseGlobalExceptionHandler();
 app.MapEndpoints();

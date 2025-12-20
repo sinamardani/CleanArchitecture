@@ -1,6 +1,9 @@
 using Application.Commons.Interfaces;
+using Application.Commons.Interfaces.Authentication;
 using Application.Commons.Interfaces.Data;
+using Application.Commons.Models.AppSettings;
 using Infrastructure.Services;
+using Infrastructure.Services.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +17,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration) =>
         services
+            .Configure<JwtSettings>(configuration.GetSection(nameof(JwtSettings)))
+            .AddScoped<IJwtService, JwtService>()
             .AddLogService(configuration)
             .AddRedis(configuration);
 
