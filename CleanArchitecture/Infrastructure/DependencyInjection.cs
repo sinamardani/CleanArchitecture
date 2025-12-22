@@ -13,18 +13,13 @@ namespace Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services,
-        IConfiguration configuration) =>
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration) =>
         services
-            .Configure<JwtSettings>(configuration.GetSection(nameof(JwtSettings)))
-            .AddScoped<IJwtService, JwtService>()
+            .AddService(configuration)
             .AddLogService(configuration)
             .AddRedis(configuration);
 
-    private static IServiceCollection AddLogService(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    private static IServiceCollection AddLogService(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<ILogService>(sp => new LogService(
             configuration,
@@ -34,12 +29,18 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddRedis(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    private static IServiceCollection AddService(this IServiceCollection service, IConfiguration configuration)
+    {
+        service.Configure<JwtSettings>(configuration.GetSection(nameof(JwtSettings)));
+        service.AddScoped<IJwtService, JwtService>();
+
+        return service;
+    }
+
+    private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
     {
         var redisConnectionString = configuration.GetConnectionString("Redis");
-        
+
         if (!string.IsNullOrWhiteSpace(redisConnectionString))
         {
             services.AddStackExchangeRedisCache(options =>

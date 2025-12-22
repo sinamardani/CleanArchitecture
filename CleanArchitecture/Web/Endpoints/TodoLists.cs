@@ -5,6 +5,7 @@ using Application.TodoLists.Commands.PurgeTodoLists;
 using Application.TodoLists.Commands.UpdateTodoList;
 using Application.TodoLists.Queries.GetTodos;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Web.Infrastructure;
 
 namespace Web.Endpoints;
@@ -13,10 +14,10 @@ public class TodoLists : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(CreateTodoList, nameof(CreateTodoList));
-        groupBuilder.MapPut(UpdateTodoList, nameof(UpdateTodoList));
-        groupBuilder.MapGet(GetTodos, nameof(GetTodos));
-        groupBuilder.MapDelete(DeleteTodoListBy, nameof(DeleteTodoListBy));
+        groupBuilder.RequireAuthorization().MapPost(CreateTodoList, nameof(CreateTodoList));
+        groupBuilder.RequireAuthorization().MapPut(UpdateTodoList, nameof(UpdateTodoList));
+        groupBuilder.RequireAuthorization().MapGet(GetTodos, nameof(GetTodos));
+        groupBuilder.RequireAuthorization().MapDelete(DeleteTodoListBy, nameof(DeleteTodoListBy));
     }
 
     public async Task<CrudResult<int>> CreateTodoList(ISender sender, CreateTodoListCommand command)
