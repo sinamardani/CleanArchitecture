@@ -21,7 +21,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Authorization\Commands\CreateUser\" />
+    <Folder Include="Authorization\Commands\DeleteUser\" />
+    <Folder Include="Authorization\Commands\Login\" />
+    <Folder Include="Authorization\Commands\Logout\" />
+    <Folder Include="Authorization\Commands\RefreshToken\" />
+    <Folder Include="Authorization\Commands\UpdateUser\" />
     <Folder Include="Commons\Behaviours\" />
+    <Folder Include="Commons\Interfaces\Authentication\" />
   </ItemGroup>
 
 </Project>
