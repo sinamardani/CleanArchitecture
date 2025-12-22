@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography;
+using Application.Commons.Interfaces.Authentication;
 using Application.Commons.Models.AppSettings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,8 @@ public static class DependencyInjection
     {
         return service
             .AddHttpContextAccessor()
-            .AddScoped<ICurrentUserService, CurrentUserService>();
+            .AddScoped<ICurrentUserService, CurrentUserService>()
+            .AddScoped<ICookieService, CookieService>();
     }
 
     private static IServiceCollection AddAuthentication(
@@ -67,6 +69,19 @@ public static class DependencyInjection
                 ValidAudience = jwtSettings.Audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    var token = context.Request.Cookies["access_token"];
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        context.Token = token;
+                    }
+                    return Task.CompletedTask;
+                }
             };
         });
 
