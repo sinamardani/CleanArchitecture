@@ -18,18 +18,18 @@ public class LogService : ILogService, IDisposable
     private readonly ILogger _dbLogger;
     private readonly ILogger _consoleLogger;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    //private readonly ICurrentUserService _currentUserService;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IHostEnvironment _hostEnvironment;
     private bool _disposed;
 
     public LogService(
         IConfiguration configuration,
         IHttpContextAccessor httpContextAccessor,
-        //ICurrentUserService currentUserService,
+        ICurrentUserService currentUserService,
         IHostEnvironment hostEnvironment)
     {
         _httpContextAccessor = httpContextAccessor;
-        //_currentUserService = currentUserService;
+        _currentUserService = currentUserService;
         _hostEnvironment = hostEnvironment;
 
         try
@@ -92,7 +92,7 @@ public class LogService : ILogService, IDisposable
         try
         {
             var logEventLevel = ConvertToLogEventLevel(level);
-            //using (LogContext.PushProperty("UserId", _currentUserService.UserId))
+            using (LogContext.PushProperty("UserId", _currentUserService.UserId))
             using (LogContext.PushProperty("RequestPath", _httpContextAccessor.HttpContext?.Request.Path))
             using (LogContext.PushProperty("HttpMethod", _httpContextAccessor.HttpContext?.Request.Method))
             using (LogContext.PushProperty("IPAddress", GetIpAddress()))

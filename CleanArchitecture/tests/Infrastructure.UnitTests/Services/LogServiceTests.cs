@@ -1,3 +1,4 @@
+using Application.Commons.Interfaces.Data;
 using FluentAssertions;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
@@ -19,15 +20,18 @@ public class LogServiceTests
             .Build();
 
         var httpContextAccessor = new Mock<IHttpContextAccessor>();
+        var currentUserService = new Mock<ICurrentUserService>();
         var hostEnvironment = new Mock<IHostEnvironment>();
 
         var mockHttpContext = new Mock<HttpContext>();
         httpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+        currentUserService.Setup(x => x.UserId).Returns((int?)null);
         hostEnvironment.Setup(x => x.EnvironmentName).Returns("Test");
 
         return new LogService(
             configuration,
             httpContextAccessor.Object,
+            currentUserService.Object,
             hostEnvironment.Object);
     }
 

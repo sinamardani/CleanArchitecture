@@ -22,6 +22,9 @@ This project implements Clean Architecture with clear separation of concerns acr
 - ✅ **Minimal APIs** - Modern ASP.NET Core Minimal APIs with endpoint groups
 - ✅ **Entity Framework Core 9.0** - Code-first approach with migrations
 - ✅ **ASP.NET Core Identity** - Built-in authentication and authorization with custom ApplicationUser
+- ✅ **JWT Authentication** - ECDSA-based JWT tokens (ES256 algorithm) with cookie-based storage
+- ✅ **Refresh Token Support** - Secure refresh token mechanism with configurable expiration
+- ✅ **Cookie Service** - Secure HTTP-only cookie management for tokens
 - ✅ **FluentValidation** - Fluent validation for commands and queries with automatic validation pipeline
 - ✅ **Mapster** - High-performance object mapping with dependency injection support
 - ✅ **Redis Caching** - Distributed caching support (optional)
@@ -35,7 +38,7 @@ This project implements Clean Architecture with clear separation of concerns acr
 - ✅ **Exception Handling** - Global exception handling middleware with ProblemDetails
 - ✅ **Performance Monitoring** - Built-in performance behavior tracking (logs requests > 500ms)
 - ✅ **Result Pattern** - Consistent API response pattern with CrudResult
-- ✅ **Endpoint Groups** - Organized API endpoints using endpoint groups
+- ✅ **Endpoint Groups** - Organized API endpoints using endpoint groups with automatic discovery
 - ✅ **Database Initialization** - Automatic database seeding and migration support
 - ✅ **Custom Logging Service** - Structured logging to SQL Server with Serilog, including HTTP context, IP address, user agent, and more
 - ✅ **Unit Testing** - Comprehensive unit test infrastructure with xUnit, FluentAssertions, and Moq, organized in Feature-Based structure
@@ -141,10 +144,20 @@ CleanArchitecture/
 │       │   └── GetTodoItemsWithPagination/
 │       └── EventHandlers/          # Domain event handlers
 │           └── TodoItemCreatedEventHandler.cs
+│   └── Authorization/              # Authentication and authorization use cases
+│       └── Commands/               # Authorization commands
+│           ├── CreateUser/
+│           ├── UpdateUser/
+│           ├── DeleteUser/
+│           ├── Login/
+│           ├── Logout/
+│           └── RefreshToken/
 │
 ├── Infrastructure/                   # Infrastructure layer
 │   ├── Services/                     # Infrastructure services
-│   │   └── LogService.cs           # Custom logging service with Serilog
+│   │   ├── LogService.cs           # Custom logging service with Serilog
+│   │   └── Authentication/         # Authentication services
+│   │       └── JwtService.cs       # JWT token generation and validation
 │   └── DependencyInjection.cs      # Infrastructure DI configuration
 │
 ├── Persistence/                      # Data access layer
@@ -168,9 +181,14 @@ CleanArchitecture/
 │   │   ├── EndpointGroupBase.cs    # Base class for endpoint groups
 │   │   ├── IEndpointRouteBuilderExtensions.cs # Endpoint extensions
 │   │   ├── MethodInfoExtensions.cs
-│   │   └── WebApplicationExtensions.cs
+│   │   └── WebApplicationExtensions.cs # Automatic endpoint discovery
 │   ├── Services/                    # Web services
-│   │   └── CurrentUserService.cs  # Current user service
+│   │   ├── CurrentUserService.cs  # Current user service
+│   │   └── CookieService.cs       # Cookie management for tokens
+│   ├── Keys/                        # JWT key storage
+│   │   ├── private-key.pem        # ECDSA private key (not in repo)
+│   │   ├── public-key.pem         # ECDSA public key (not in repo)
+│   │   └── README.md              # Key generation instructions
 │   ├── Extensions/                  # Extension methods
 │   │   ├── ApplicationInitializerExtensions.cs
 │   │   └── ExceptionHandlerExtensions.cs # Global exception handler
@@ -248,6 +266,17 @@ CleanArchitecture/
    ```
 
    Note: When using .NET Aspire (AppHost), connection strings are automatically configured.
+
+4. **Generate JWT Keys**
+
+   Generate ECDSA keys for JWT authentication (see `Web/Keys/README.md` for details):
+   ```bash
+   cd CleanArchitecture/Web/Keys
+   openssl ecparam -genkey -name prime256v1 -noout -out private-key.pem
+   openssl ec -in private-key.pem -pubout -out public-key.pem
+   ```
+
+   **Important:** Never commit these keys to the repository. The `Keys/` directory is already gitignored.
 
 4. **Run database migrations**
 
@@ -345,6 +374,50 @@ options.Password.RequiredLength = 6;
 options.User.RequireUniqueEmail = true;
 ```
 
+### JWT Authentication Configuration
+
+The application uses ECDSA (ES256) algorithm for JWT token signing. Configuration is in `appsettings.json`:
+
+```json
+{
+  "JwtSettings": {
+    "PrivateKeyPath": "Keys/private-key.pem",
+    "PublicKeyPath": "Keys/public-key.pem",
+    "Issuer": "CleanArchitecture",
+    "Audience": "CleanArchitectureUsers",
+    "ExpirationMinutes": 60
+  },
+  "CookieSettings": {
+    "Secure": true,
+    "RefreshTokenExpirationDays": 7
+  }
+}
+```
+
+**JWT Key Setup:**
+
+1. Generate ECDSA keys using OpenSSL:
+```bash
+# Generate private key
+openssl ecparam -genkey -name prime256v1 -noout -out private-key.pem
+
+# Generate public key from private key
+openssl ec -in private-key.pem -pubout -out public-key.pem
+```
+
+2. Place the keys in `Web/Keys/` directory (this directory is gitignored for security)
+
+3. The keys are automatically loaded at startup
+
+**Token Storage:**
+
+- Access tokens are stored in HTTP-only cookies (`access_token`)
+- Refresh tokens are stored in HTTP-only cookies (`refresh_token`)
+- Cookies are configured with `Secure`, `HttpOnly`, and `SameSite=Strict` flags
+- Token can also be sent via Authorization header: `Bearer {token}`
+
+For detailed key generation instructions, see `Web/Keys/README.md`.
+
 ### OpenTelemetry Configuration
 
 OpenTelemetry is configured in `ServiceDefaults/Extensions.cs`. The OTLP endpoint can be configured via:
@@ -414,6 +487,54 @@ Add the `LoggingDb` connection string to `appsettings.json`:
 
 If the connection string is not provided or connection fails, the service falls back to console logging.
 
+## 🔐 Authentication & Authorization
+
+### JWT Authentication Flow
+
+The application implements JWT-based authentication using ECDSA (ES256) algorithm:
+
+1. **Login**: User authenticates with credentials
+   - Credentials are validated against ASP.NET Core Identity
+   - JWT access token is generated using `IJwtService`
+   - Refresh token is generated (if implemented)
+   - Tokens are stored in HTTP-only cookies via `ICookieService`
+
+2. **Token Validation**: 
+   - Tokens can be sent via:
+     - HTTP-only cookie (`access_token`)
+     - Authorization header (`Bearer {token}`)
+   - JWT Bearer middleware validates tokens on each request
+   - Public key is loaded from `Keys/public-key.pem`
+
+3. **Refresh Token**:
+   - Refresh tokens are stored in HTTP-only cookies (`refresh_token`)
+   - Configurable expiration (default: 7 days)
+   - Used to obtain new access tokens without re-authentication
+
+4. **Logout**:
+   - Removes both access and refresh token cookies
+   - Invalidates session
+
+### Authorization Commands
+
+The project includes authorization command structure (endpoints can be implemented as needed):
+
+- **CreateUser**: Register new users
+- **UpdateUser**: Update user information
+- **DeleteUser**: Delete user accounts
+- **Login**: Authenticate users and generate tokens
+- **Logout**: Sign out users
+- **RefreshToken**: Refresh access tokens
+
+### Security Features
+
+- **HTTP-only Cookies**: Prevents XSS attacks
+- **Secure Flag**: Cookies only sent over HTTPS (configurable)
+- **SameSite=Strict**: CSRF protection
+- **ECDSA Keys**: Asymmetric encryption for token signing
+- **Token Expiration**: Configurable token lifetime
+- **Clock Skew**: Set to zero for strict time validation
+
 ## 🏛️ Architecture Patterns
 
 ### CQRS (Command Query Responsibility Segregation)
@@ -471,18 +592,27 @@ public class CrudResult<T> : BaseResult
 
 ### Endpoint Groups
 
-Endpoints are organized using endpoint groups that inherit from `EndpointGroupBase`:
+Endpoints are organized using endpoint groups that inherit from `EndpointGroupBase`. Endpoints are automatically discovered and registered:
 
 ```csharp
 public class TodoLists : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(CreateTodoList, nameof(CreateTodoList));
+        groupBuilder.RequireAuthorization().MapPost(CreateTodoList, nameof(CreateTodoList));
         // ...
     }
 }
 ```
+
+**Automatic Discovery:**
+- All classes inheriting from `EndpointGroupBase` are automatically discovered
+- Endpoints are mapped to `/api/{GroupName}` route
+- Authorization can be applied at the group level using `RequireAuthorization()`
+
+**Current Endpoint Groups:**
+- `/api/TodoLists` - Todo list management endpoints
+- `/api/TodoItems` - Todo item management endpoints
 
 ## 🧪 Example Domain
 
@@ -490,6 +620,7 @@ The template includes a complete Todo application as an example:
 
 - **TodoLists**: Manage todo lists with colors (value object)
 - **TodoItems**: Manage individual todo items within lists with priorities and reminders
+- **Authorization**: User management and authentication (commands structure ready)
 
 This demonstrates:
 - Aggregate roots (`TodoList`)
@@ -499,6 +630,9 @@ This demonstrates:
 - API endpoints with endpoint groups
 - Pagination support
 - Soft delete functionality
+- JWT authentication with ECDSA keys
+- Cookie-based token storage
+- Refresh token mechanism
 - **Comprehensive unit testing** with Feature-Based organization (51 tests covering all layers)
 
 ## 📦 Key Components
@@ -528,6 +662,27 @@ Entities inheriting from `BaseAuditTableEntity` support soft delete. When an ent
 The `ICurrentUserService` interface provides access to the current user context:
 - `UserId`: Current user ID
 - Used by `AuditTableEntityInterceptor` to set audit fields
+
+### JWT Service
+
+The `IJwtService` interface provides JWT token operations:
+- `GenerateToken(int userId)`: Generates a JWT access token using ECDSA (ES256)
+- `ValidateToken(string token)`: Validates and parses a JWT token
+
+### Cookie Service
+
+The `ICookieService` interface provides secure cookie management for tokens:
+- `SetTokenCookie(string token)`: Sets access token in HTTP-only cookie
+- `GetTokenFromCookie()`: Retrieves access token from cookie
+- `RemoveTokenCookie()`: Removes access token cookie
+- `SetRefreshTokenCookie(string refreshToken)`: Sets refresh token in HTTP-only cookie
+- `GetRefreshTokenFromCookie()`: Retrieves refresh token from cookie
+- `RemoveRefreshTokenCookie()`: Removes refresh token cookie
+
+All cookies are configured with:
+- `HttpOnly`: Prevents JavaScript access
+- `Secure`: Only sent over HTTPS (configurable)
+- `SameSite=Strict`: CSRF protection
 
 ### Logging Service
 
@@ -575,6 +730,7 @@ For custom Docker deployment:
 ### Production Considerations
 
 - Configure proper connection strings via environment variables or secure configuration
+- **Generate and securely store JWT keys** (use Azure Key Vault, AWS Secrets Manager, or environment variables)
 - Set up Redis for production caching
 - Configure OpenTelemetry endpoints for observability
 - Set up proper logging (Application Insights, Seq, etc.)
@@ -582,8 +738,11 @@ For custom Docker deployment:
 - Set up database backups
 - Configure CORS policies
 - Set up rate limiting
-- Configure authentication and authorization
+- Configure authentication and authorization policies
 - Set up monitoring and alerting
+- Ensure `CookieSettings:Secure` is set to `true` in production
+- Rotate JWT keys periodically
+- Implement proper refresh token storage (consider database storage for production)
 
 ## 🧪 Development
 
@@ -596,9 +755,32 @@ For custom Docker deployment:
 5. **Create Validators** for commands/queries using FluentValidation
 6. **Create Mappings** in `Application/Commons/Mappings/` (if needed)
 7. **Create EF Core Configuration** in `Persistence/Data/Configurations/`
-8. **Create Endpoints** in `Web/Endpoints/{Feature}.cs`
-9. **Register Endpoints** in `Web/Infrastructure/WebApplicationExtensions.cs`
+8. **Create Endpoints** in `Web/Endpoints/{Feature}.cs` (inherit from `EndpointGroupBase`)
+9. **Endpoints are automatically discovered** - no manual registration needed
 10. **Create Unit Tests** following the Feature-Based structure in `tests/`
+
+**Example Endpoint Group:**
+
+```csharp
+public class MyFeature : EndpointGroupBase
+{
+    public override void Map(RouteGroupBuilder groupBuilder)
+    {
+        groupBuilder.RequireAuthorization().MapPost(Create, nameof(Create));
+        groupBuilder.RequireAuthorization().MapGet(Get, nameof(Get));
+    }
+
+    public async Task<CrudResult<int>> Create(ISender sender, CreateCommand command)
+    {
+        return await sender.Send(command);
+    }
+
+    public async Task<CrudResult<MyDto>> Get(ISender sender, [AsParameters] GetQuery query)
+    {
+        return await sender.Send(query);
+    }
+}
+```
 
 ### Running Migrations
 

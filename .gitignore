@@ -416,3 +416,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# JWT Keys - Never commit private keys
+**/Keys/*.pem
+**/Keys/*.key
+**/Keys/private-key*
+!**/Keys/.gitkeep
+!**/Keys/README.md

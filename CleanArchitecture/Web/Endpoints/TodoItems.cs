@@ -14,11 +14,11 @@ public class TodoItems : EndpointGroupBase
 {
     public override void Map(RouteGroupBuilder groupBuilder)
     {
-        groupBuilder.MapPost(CreateTodoItem, nameof(CreateTodoItem));
-        groupBuilder.MapPut(UpdateTodoItem, nameof(UpdateTodoItem));
-        groupBuilder.MapPut(UpdateTodoItemDetail, nameof(UpdateTodoItemDetail));
-        groupBuilder.MapGet(GetTodoItemsWithPagination, nameof(GetTodoItemsWithPagination));
-        groupBuilder.MapDelete(DeleteTodoItemBy, nameof(DeleteTodoItemBy));
+        groupBuilder.RequireAuthorization().MapPost(CreateTodoItem, nameof(CreateTodoItem));
+        groupBuilder.RequireAuthorization().MapPut(UpdateTodoItem, nameof(UpdateTodoItem));
+        groupBuilder.RequireAuthorization().MapPut(UpdateTodoItemDetail, nameof(UpdateTodoItemDetail));
+        groupBuilder.RequireAuthorization().MapGet(GetTodoItemsWithPagination, nameof(GetTodoItemsWithPagination));
+        groupBuilder.RequireAuthorization().MapDelete(DeleteTodoItemBy, nameof(DeleteTodoItemBy));
     }
 
     public async Task<CrudResult<int>> CreateTodoItem(ISender sender, CreateTodoItemCommand command)
