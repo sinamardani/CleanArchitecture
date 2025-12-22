@@ -24,7 +24,7 @@ public static class DependencyInjection
         services.AddSingleton<ILogService>(sp => new LogService(
             configuration,
             sp.GetRequiredService<IHttpContextAccessor>(),
-            //sp.GetRequiredService<ICurrentUserService>(), // Todo CurrentUser
+            sp.GetRequiredService<ICurrentUserService>(),
             sp.GetRequiredService<IHostEnvironment>()));
         return services;
     }
