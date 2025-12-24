@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Authorization\**" />
+    <EmbeddedResource Remove="Authorization\**" />
+    <None Remove="Authorization\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
     <PackageReference Include="Mapster" Version="7.4.0" />
@@ -18,17 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Authorization\Commands\CreateUser\" />
-    <Folder Include="Authorization\Commands\DeleteUser\" />
-    <Folder Include="Authorization\Commands\Login\" />
-    <Folder Include="Authorization\Commands\Logout\" />
-    <Folder Include="Authorization\Commands\RefreshToken\" />
-    <Folder Include="Authorization\Commands\UpdateUser\" />
-    <Folder Include="Commons\Behaviours\" />
-    <Folder Include="Commons\Interfaces\Authentication\" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

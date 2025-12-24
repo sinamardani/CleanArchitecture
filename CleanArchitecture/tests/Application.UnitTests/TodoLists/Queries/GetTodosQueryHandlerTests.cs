@@ -1,8 +1,8 @@
-using Application.Commons.Interfaces.Data;
-using Application.Commons.Models.CustomResult;
-using Application.TodoLists.Queries.GetTodos;
+using Application.Common.Interfaces.Data;
+using Application.Features.TodoLists.Queries.GetTodos;
 using Domain.Commons.Enums;
 using Domain.TodoLists;
+using Shared.Models.CustomResult;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

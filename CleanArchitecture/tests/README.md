@@ -1,231 +1,138 @@
-# Unit Tests
+# Test Structure
 
-این پوشه شامل پروژه‌های Unit Test برای لایه‌های مختلف پروژه است که به صورت **Feature-Based** سازماندهی شده‌اند.
+This directory contains all tests for the Clean Architecture solution, organized by test type and layer.
 
-## ساختار پروژه‌ها
+## Test Structure Overview
 
-### Domain.UnitTests
-پروژه تست برای لایه Domain که شامل:
-- تست Entity ها
-- تست Value Objects
-- تست Domain Events
-- تست Domain Logic
-
-**پکیج‌های استفاده شده:**
-- xUnit
-- FluentAssertions
-
-**ساختار Feature-Based:**
 ```
-Domain.UnitTests/
-├── TodoItems/
-│   ├── TodoItemTests.cs
-│   └── Events/          # تست‌های Domain Events مربوط به TodoItem
-├── TodoLists/
-│   ├── TodoListTests.cs
-│   └── ValueObjects/    # تست‌های Value Objects مربوط به TodoList
-└── [FeatureName]/       # برای Feature های جدید
+tests/
+├── Unit/                          # Fast, isolated unit tests (no external dependencies)
+│   ├── Domain.UnitTests/         # Pure domain logic tests (no mocks)
+│   ├── Application.UnitTests/    # Application use cases with mocked dependencies
+│   └── Infrastructure.UnitTests/ # Infrastructure services with mocked dependencies
+│
+├── Integration/                   # Integration tests (real dependencies, slower)
+│   ├── Application.IntegrationTests/  # Application layer with real database
+│   ├── Persistence.IntegrationTests/  # EF Core with real database
+│   └── Infrastructure.IntegrationTests/ # Real external services (Redis, etc.)
+│
+├── EndToEnd/                      # End-to-end tests (full application stack)
+│   └── Web.IntegrationTests/     # API tests using WebApplicationFactory
+│
+└── Shared/                        # Shared test utilities and helpers
+    └── TestUtilities/             # TestBase classes, Fixtures, Helpers
 ```
 
-### Application.UnitTests
-پروژه تست برای لایه Application که شامل:
-- تست Command Handlers
-- تست Query Handlers
-- تست Validators
-- تست Event Handlers
+## Test Types Explained
 
-**پکیج‌های استفاده شده:**
-- xUnit
-- FluentAssertions
-- Moq (برای Mock کردن وابستگی‌ها)
+### Unit Tests (`Unit/`)
+**Purpose:** Test individual components in isolation with mocked dependencies.
 
-**ساختار Feature-Based:**
-```
-Application.UnitTests/
-├── TodoItems/
-│   ├── Commands/         # تست‌های Command Handlers مربوط به TodoItem
-│   ├── Queries/          # تست‌های Query Handlers مربوط به TodoItem
-│   ├── Validators/       # تست‌های Validators مربوط به TodoItem
-│   └── EventHandlers/    # تست‌های Domain Event Handlers مربوط به TodoItem
-├── TodoLists/
-│   ├── Commands/         # تست‌های Command Handlers مربوط به TodoList
-│   ├── Queries/          # تست‌های Query Handlers مربوط به TodoList
-│   └── Validators/       # تست‌های Validators مربوط به TodoList
-└── [FeatureName]/        # برای Feature های جدید
-```
+**Characteristics:**
+- Fast execution (< 1ms per test typically)
+- No external dependencies (database, file system, network)
+- Use mocks/stubs for dependencies
+- Test business logic, validation, and transformations
+- Should run in parallel
 
-### Infrastructure.UnitTests
-پروژه تست برای لایه Infrastructure که شامل:
-- تست Infrastructure Services
-- تست External Service Integrations
+**When to use:**
+- Domain entities and value objects
+- Application command/query handlers (with mocked IApplicationDbContext)
+- Infrastructure services (with mocked external dependencies)
+- Validators and business rules
 
-**پکیج‌های استفاده شده:**
-- xUnit
-- FluentAssertions
-- Moq
+### Integration Tests (`Integration/`)
+**Purpose:** Test components with real dependencies (database, external services).
 
-**ساختار:**
-```
-Infrastructure.UnitTests/
-├── Services/
-│   └── LogServiceTests.cs
-└── [ServiceName]/        # برای سرویس‌های جدید
-```
+**Characteristics:**
+- Slower execution (10-100ms per test)
+- Use real database (InMemory or TestContainers)
+- Test data persistence and retrieval
+- Test EF Core configurations and interceptors
+- May require test isolation (database cleanup)
 
-### Persistence.UnitTests
-پروژه تست برای لایه Persistence که شامل:
-- تست DbContext
-- تست Entity Configurations
-- تست Interceptors
-- تست Repository Pattern (در صورت استفاده)
+**When to use:**
+- Application handlers with real database
+- EF Core DbContext operations
+- Entity configurations
+- Database interceptors
+- Infrastructure services with real external APIs
 
-**پکیج‌های استفاده شده:**
-- xUnit
-- FluentAssertions
-- Moq
-- Microsoft.EntityFrameworkCore.InMemory (برای تست‌های In-Memory)
+### End-to-End Tests (`EndToEnd/`)
+**Purpose:** Test the complete application flow through the API.
 
-**ساختار:**
-```
-Persistence.UnitTests/
-├── Data/
-│   ├── ApplicationDbContextTests.cs
-│   ├── Configurations/  # تست‌های Entity Configurations
-│   └── Interceptors/    # تست‌های EF Core Interceptors
-└── [FeatureName]/       # برای Feature های جدید
-```
+**Characteristics:**
+- Slowest execution (100ms-1s per test)
+- Use WebApplicationFactory to bootstrap the application
+- Test HTTP requests/responses
+- Test authentication/authorization
+- Test complete user workflows
 
-## نحوه اجرای تست‌ها
+**When to use:**
+- API endpoint testing
+- Authentication flows
+- Complete business workflows
+- Integration between all layers
 
-### اجرای همه تست‌ها
+## Running Tests
+
+### Run all tests
 ```bash
-dotnet test CleanArchitecture/CleanArchitecture.sln
+dotnet test
 ```
 
-### اجرای تست‌های Domain
+### Run only unit tests (fast)
 ```bash
-dotnet test CleanArchitecture/tests/Domain.UnitTests/Domain.UnitTests.csproj
+dotnet test --filter "FullyQualifiedName~Unit"
 ```
 
-### اجرای تست‌های Application
+### Run only integration tests
 ```bash
-dotnet test CleanArchitecture/tests/Application.UnitTests/Application.UnitTests.csproj
+dotnet test --filter "FullyQualifiedName~Integration"
 ```
 
-### اجرای تست‌های Infrastructure
+### Run tests for a specific layer
 ```bash
-dotnet test CleanArchitecture/tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj
+dotnet test tests/Unit/Domain.UnitTests/
+dotnet test tests/Unit/Application.UnitTests/
+dotnet test tests/Integration/Application.IntegrationTests/
 ```
 
-### اجرای تست‌های Persistence
+### Run with coverage
 ```bash
-dotnet test CleanArchitecture/tests/Persistence.UnitTests/Persistence.UnitTests.csproj
-```
-
-### اجرای با جزئیات بیشتر
-```bash
-dotnet test CleanArchitecture/tests/Application.UnitTests/Application.UnitTests.csproj --verbosity normal
-```
-
-## نوشتن تست جدید
-
-### مثال تست Domain (Feature-Based)
-```csharp
-using FluentAssertions;
-
-namespace Domain.UnitTests.TodoItems;
-
-public class TodoItemTests
-{
-    [Fact]
-    public void SetDone_ToTrue_ShouldRaiseTodoItemCompletedEvent()
-    {
-        var todoItem = new TodoItem
-        {
-            ListId = 1,
-            Title = "Test Item",
-            Done = false
-        };
-
-        todoItem.Done = true;
-
-        todoItem.Done.Should().BeTrue();
-        todoItem.DomainEvents.Should().ContainSingle();
-    }
-}
-```
-
-### مثال تست Application با Mock (Feature-Based)
-```csharp
-using Moq;
-using FluentAssertions;
-
-namespace Application.UnitTests.TodoItems.Commands;
-
-public class CreateTodoItemCommandHandlerTests
-{
-    [Fact]
-    public async Task Handle_ShouldCreateTodoItem_AndReturnSuccessResult()
-    {
-        var mockContext = new Mock<IApplicationDbContext>();
-        var handler = new CreateTodoItemCommandHandler(mockContext.Object);
-        
-        var command = new CreateTodoItemCommand
-        {
-            ListId = 1,
-            Title = "Test Item"
-        };
-        
-        var result = await handler.Handle(command, CancellationToken.None);
-        
-        result.Should().NotBeNull();
-        result.Status.Should().Be(CrudStatus.Succeeded);
-    }
-}
-```
-
-### مثال تست Validator (Feature-Based)
-```csharp
-using FluentValidation.TestHelper;
-
-namespace Application.UnitTests.TodoItems.Validators;
-
-public class CreateTodoItemCommandValidatorTests
-{
-    private readonly CreateTodoItemCommandValidator _validator = new();
-
-    [Fact]
-    public void Validate_WithValidCommand_ShouldPass()
-    {
-        var command = new CreateTodoItemCommand
-        {
-            ListId = 1,
-            Title = "Valid Title"
-        };
-
-        var result = _validator.TestValidate(command);
-
-        result.ShouldNotHaveAnyValidationErrors();
-    }
-}
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 ```
 
 ## Best Practices
 
-1. هر تست باید یک چیز را تست کند
-2. از نام‌گذاری واضح استفاده کنید: `MethodName_Scenario_ExpectedBehavior`
-3. از AAA Pattern استفاده کنید: Arrange, Act, Assert
-4. از FluentAssertions برای خوانایی بیشتر استفاده کنید
-5. از Moq برای Mock کردن وابستگی‌ها استفاده کنید
-6. تست‌ها را در پوشه Feature مربوطه قرار دهید
+1. **Unit Tests:**
+   - Keep tests fast (< 1ms)
+   - Use mocks for all dependencies
+   - Test one thing per test
+   - Use descriptive test names: `MethodName_Scenario_ExpectedBehavior`
 
-## ساختار Feature-Based
+2. **Integration Tests:**
+   - Use unique database names per test to avoid conflicts
+   - Clean up test data after each test
+   - Consider using TestContainers for real database testing
+   - Test realistic scenarios, not edge cases
 
-برای هر Feature جدید (مثل Products, Orders و غیره):
-1. در `Domain.UnitTests/[FeatureName]/` تست‌های Domain را بنویسید
-2. در `Application.UnitTests/[FeatureName]/Commands/` تست‌های Commands را بنویسید
-3. در `Application.UnitTests/[FeatureName]/Queries/` تست‌های Queries را بنویسید
-4. در `Application.UnitTests/[FeatureName]/Validators/` تست‌های Validators را بنویسید
+3. **End-to-End Tests:**
+   - Test complete user workflows
+   - Use realistic test data
+   - Test error scenarios and edge cases
+   - Keep tests independent and isolated
 
-این ساختار باعث می‌شود تست‌های مربوط به هر Feature در کنار هم باشند و نگهداری و توسعه راحت‌تر شود.
+4. **Test Organization:**
+   - Follow feature-based structure within each test project
+   - Mirror the production code structure
+   - Group related tests in the same file
+   - Use test fixtures for shared setup
 
+## Test Utilities
+
+Shared test utilities are located in `Shared/TestUtilities/`:
+- `TestBase` - Base classes for common test setup
+- `DatabaseFixture` - Database setup and cleanup
+- `WebApplicationFactoryFixture` - Web application factory setup
+- `TestDataBuilder` - Fluent builders for test data

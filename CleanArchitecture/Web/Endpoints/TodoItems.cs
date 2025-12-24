@@ -1,11 +1,11 @@
-﻿using Application.Commons.Models;
-using Application.Commons.Models.CustomResult;
-using Application.TodoItems.Commands.CreateTodoItem;
-using Application.TodoItems.Commands.DeleteTodoItem;
-using Application.TodoItems.Commands.UpdateTodoItem;
-using Application.TodoItems.Commands.UpdateTodoItemDetail;
-using Application.TodoItems.Queries.GetTodoItemsWithPagination;
+﻿using Application.Features.TodoItems.Commands.CreateTodoItem;
+using Application.Features.TodoItems.Commands.DeleteTodoItem;
+using Application.Features.TodoItems.Commands.UpdateTodoItem;
+using Application.Features.TodoItems.Commands.UpdateTodoItemDetail;
+using Application.Features.TodoItems.Queries.GetTodoItemsWithPagination;
 using MediatR;
+using Shared.Models;
+using Shared.Models.CustomResult;
 using Web.Infrastructure;
 
 namespace Web.Endpoints;

@@ -1,5 +1,4 @@
-﻿using Application.Commons.Interfaces;
-using Application.Commons.Interfaces.Data;
+﻿using Shared.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

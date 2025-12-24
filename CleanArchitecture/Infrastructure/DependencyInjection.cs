@@ -1,13 +1,13 @@
-using Application.Commons.Interfaces;
-using Application.Commons.Interfaces.Authentication;
-using Application.Commons.Interfaces.Data;
-using Application.Commons.Models.AppSettings;
+using Application.Common.Interfaces.Data;
+using Shared.Models.AppSettings;
 using Infrastructure.Services;
 using Infrastructure.Services.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Shared.Interfaces;
+using Shared.Interfaces.Authentication;
 
 namespace Infrastructure;
 

@@ -1,11 +1,11 @@
-﻿using Application.Commons.Models.CustomResult;
-using Application.TodoLists.Commands.CreateTodoList;
-using Application.TodoLists.Commands.DeleteTodoList;
-using Application.TodoLists.Commands.PurgeTodoLists;
-using Application.TodoLists.Commands.UpdateTodoList;
-using Application.TodoLists.Queries.GetTodos;
+﻿using Application.Features.TodoLists.Commands.CreateTodoList;
+using Application.Features.TodoLists.Commands.DeleteTodoList;
+using Application.Features.TodoLists.Commands.PurgeTodoLists;
+using Application.Features.TodoLists.Commands.UpdateTodoList;
+using Application.Features.TodoLists.Queries.GetTodos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Shared.Models.CustomResult;
 using Web.Infrastructure;
 
 namespace Web.Endpoints;

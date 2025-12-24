@@ -1,11 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using Application.Commons.Interfaces.Authentication;
-using Application.Commons.Models.AppSettings;
+using Shared.Models.AppSettings;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Interfaces.Authentication;
 
 namespace Infrastructure.Services.Authentication;
 

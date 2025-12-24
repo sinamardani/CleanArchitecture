@@ -1,9 +1,9 @@
-using Application.Commons.Interfaces;
-using Application.Commons.Interfaces.Data;
-using Application.Commons.Models.CustomResult;
-using Application.TodoLists.Commands.CreateTodoList;
+using Application.Common.Interfaces.Data;
+using Application.Features.TodoLists.Commands.CreateTodoList;
 using Domain.Commons.Enums;
 using Domain.TodoLists;
+using Shared.Interfaces;
+using Shared.Models.CustomResult;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

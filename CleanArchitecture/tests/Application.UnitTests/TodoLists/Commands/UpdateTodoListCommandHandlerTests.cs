@@ -1,9 +1,9 @@
-using Application.Commons.Interfaces.Data;
-using Application.Commons.Models.CustomResult;
-using Application.TodoLists.Commands.UpdateTodoList;
+using Application.Common.Interfaces.Data;
+using Application.Features.TodoLists.Commands.UpdateTodoList;
 using Ardalis.GuardClauses;
 using Domain.Commons.Enums;
 using Domain.TodoLists;
+using Shared.Models.CustomResult;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;

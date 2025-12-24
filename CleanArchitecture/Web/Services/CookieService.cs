@@ -1,4 +1,4 @@
-using Application.Commons.Interfaces.Authentication;
+using Shared.Interfaces.Authentication;
 
 namespace Web.Services;
 

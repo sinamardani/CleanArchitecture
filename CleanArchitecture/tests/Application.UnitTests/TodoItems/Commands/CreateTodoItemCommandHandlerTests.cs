@@ -1,8 +1,8 @@
-using Application.Commons.Interfaces.Data;
-using Application.Commons.Models.CustomResult;
-using Application.TodoItems.Commands.CreateTodoItem;
+using Application.Common.Interfaces.Data;
+using Application.Features.TodoItems.Commands.CreateTodoItem;
 using Domain.Commons.Enums;
 using Domain.TodoItems;
+using Shared.Models.CustomResult;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

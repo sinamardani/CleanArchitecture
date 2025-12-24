@@ -1,10 +1,10 @@
-using Application.Commons.Interfaces.Data;
 using FluentAssertions;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using Shared.Interfaces;
 
 namespace Infrastructure.UnitTests.Services;
 

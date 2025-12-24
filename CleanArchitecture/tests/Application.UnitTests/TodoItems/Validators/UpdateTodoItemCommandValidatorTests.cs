@@ -1,4 +1,4 @@
-using Application.TodoItems.Commands.UpdateTodoItem;
+using Application.Features.TodoItems.Commands.UpdateTodoItem;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 

@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Security.Cryptography;
-using Application.Commons.Interfaces.Authentication;
-using Application.Commons.Models.AppSettings;
+using Shared.Models.AppSettings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -9,7 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Contexts;
 using NSwag.Generation.Processors;
-using Application.Commons.Interfaces.Data;
+using Shared.Interfaces;
+using Shared.Interfaces.Authentication;
 using Web.Services;
 
 namespace Web;
