@@ -7,8 +7,9 @@ A comprehensive, production-ready Clean Architecture template for building scala
 This project implements Clean Architecture with clear separation of concerns across multiple layers:
 
 - **Domain**: Core business logic, entities, value objects, and domain events (no dependencies on other layers)
-- **Application**: Application use cases, commands, queries, and business rules (depends only on Domain)
-- **Infrastructure**: External services integration (Redis, caching, etc.) (depends on Application and Domain)
+- **Application**: Application use cases, commands, queries, and business rules (depends on Domain and Shared)
+- **Shared**: Shared concerns including behaviors, interfaces, and models (no dependencies on other layers)
+- **Infrastructure**: External services integration (Redis, caching, etc.) (depends on Application, Domain, and Shared)
 - **Persistence**: Data access layer with Entity Framework Core (depends on Application and Domain)
 - **Web**: API endpoints, controllers, and presentation logic (depends on all layers)
 - **AppHost**: .NET Aspire orchestration for local development
@@ -116,42 +117,80 @@ CleanArchitecture/
 │           ├── TodoItemCompletedEvent.cs
 │           └── TodoItemDeletedEvent.cs
 │
-├── Application/                      # Application layer (depends on Domain)
-│   ├── Commons/                      # Shared application concerns
-│   │   ├── Behaviours/              # MediatR pipeline behaviors
-│   │   │   ├── ValidationBehaviour.cs      # Automatic validation
-│   │   │   └── PerformanceBehaviour.cs     # Performance monitoring
+├── Application/                      # Application layer (depends on Domain and Shared)
+│   ├── Common/                       # Shared application concerns
 │   │   ├── Interfaces/              # Application interfaces
-│   │   │   └── Data/               # Data access interfaces
-│   │   ├── Models/                  # DTOs and result models
-│   │   │   └── CustomResult/       # Result pattern implementation
+│   │   │   ├── Data/                # Data access interfaces
+│   │   │   │   └── IApplicationDbContext.cs
+│   │   │   └── Messaging/           # CQRS messaging interfaces
+│   │   │       ├── Command/         # Command interfaces
+│   │   │       │   ├── ICommand.cs
+│   │   │       │   └── ICommandHandler.cs
+│   │   │       └── Query/           # Query interfaces
+│   │   │           ├── IQuery.cs
+│   │   │           └── IQueryHandler.cs
 │   │   └── Mappings/                # Mapster configurations
-│   ├── TodoLists/                   # TodoList use cases
-│   │   ├── Commands/               # CQRS commands
-│   │   │   ├── CreateTodoList/
-│   │   │   ├── UpdateTodoList/
-│   │   │   ├── DeleteTodoList/
-│   │   │   └── PurgeTodoLists/
-│   │   └── Queries/                # CQRS queries
-│   │       └── GetTodos/
-│   └── TodoItems/                   # TodoItem use cases
-│       ├── Commands/               # CQRS commands
-│       │   ├── CreateTodoItem/
-│       │   ├── UpdateTodoItem/
-│       │   ├── UpdateTodoItemDetail/
-│       │   └── DeleteTodoItem/
-│       ├── Queries/                # CQRS queries
-│       │   └── GetTodoItemsWithPagination/
-│       └── EventHandlers/          # Domain event handlers
-│           └── TodoItemCreatedEventHandler.cs
-│   └── Authorization/              # Authentication and authorization use cases
-│       └── Commands/               # Authorization commands
-│           ├── CreateUser/
-│           ├── UpdateUser/
-│           ├── DeleteUser/
-│           ├── Login/
-│           ├── Logout/
-│           └── RefreshToken/
+│   │       └── MappingExtensions.cs
+│   ├── Features/                     # Feature-based organization
+│   │   ├── TodoLists/               # TodoList use cases
+│   │   │   ├── Commands/            # CQRS commands
+│   │   │   │   ├── CreateTodoList/
+│   │   │   │   │   ├── CreateTodoList.cs
+│   │   │   │   │   └── CreateTodoListCommandValidator.cs
+│   │   │   │   ├── UpdateTodoList/
+│   │   │   │   │   ├── UpdateTodoList.cs
+│   │   │   │   │   └── UpdateTodoListCommandValidator.cs
+│   │   │   │   ├── DeleteTodoList/
+│   │   │   │   │   └── DeleteTodoList.cs
+│   │   │   │   └── PurgeTodoLists/
+│   │   │   │       └── PurgeTodoLists.cs
+│   │   │   └── Queries/             # CQRS queries
+│   │   │       └── GetTodos/
+│   │   │           ├── GetTodos.cs
+│   │   │           ├── TodosVm.cs
+│   │   │           ├── TodoListDto.cs
+│   │   │           ├── TodoItemDto.cs
+│   │   │           └── LookupDto.cs
+│   │   └── TodoItems/               # TodoItem use cases
+│   │       ├── Commands/            # CQRS commands
+│   │       │   ├── CreateTodoItem/
+│   │       │   │   ├── CreateTodoItem.cs
+│   │       │   │   └── CreateTodoItemCommandValidator.cs
+│   │       │   ├── UpdateTodoItem/
+│   │       │   │   ├── UpdateTodoItem.cs
+│   │       │   │   └── UpdateTodoItemCommandValidator.cs
+│   │       │   ├── UpdateTodoItemDetail/
+│   │       │   │   └── UpdateTodoItemDetail.cs
+│   │       │   └── DeleteTodoItem/
+│   │       │       └── DeleteTodoItem.cs
+│   │       ├── Queries/             # CQRS queries
+│   │       │   └── GetTodoItemsWithPagination/
+│   │       │       ├── GetTodoItemsWithPagination.cs
+│   │       │       ├── GetTodoItemsWithPaginationQueryValidator.cs
+│   │       │       └── TodoItemBriefDto.cs
+│   │       └── EventHandlers/       # Domain event handlers
+│   │           ├── TodoItemCreatedEventHandler.cs
+│   │           └── TodoItemCompletedEventHandler.cs
+│   └── DependencyInjection.cs       # Application DI configuration
+│
+├── Shared/                           # Shared layer (no dependencies)
+│   ├── Behaviors/                    # MediatR pipeline behaviors
+│   │   ├── ValidationBehavior.cs    # Automatic validation
+│   │   └── PerformanceBehavior.cs   # Performance monitoring
+│   ├── Interfaces/                   # Shared interfaces
+│   │   ├── Authentication/          # Authentication interfaces
+│   │   │   ├── IJwtService.cs       # JWT service interface
+│   │   │   └── ICookieService.cs    # Cookie service interface
+│   │   ├── ICurrentUserService.cs   # Current user service interface
+│   │   └── ILogService.cs           # Logging service interface
+│   └── Models/                       # Shared models
+│       ├── AppSettings/             # Application settings models
+│       │   └── JwtSettings.cs
+│       ├── CustomResult/            # Result pattern implementation
+│       │   ├── BaseResult.cs
+│       │   ├── CrudResult.cs
+│       │   └── CrudMessage.cs
+│       └── PaginatedList.cs         # Pagination model
 │
 ├── Infrastructure/                   # Infrastructure layer
 │   ├── Services/                     # Infrastructure services
@@ -574,12 +613,16 @@ Domain events are automatically dispatched by `DispatchDomainEventsInterceptor` 
 
 ### MediatR Pipeline Behaviors
 
-- **ValidationBehaviour**: Automatically validates commands/queries using FluentValidation before execution
-- **PerformanceBehaviour**: Logs performance metrics for requests taking longer than 500ms
+Pipeline behaviors are located in the `Shared/Behaviors` project:
+
+- **ValidationBehavior**: Automatically validates commands/queries using FluentValidation before execution
+- **PerformanceBehavior**: Logs performance metrics for requests taking longer than 500ms
+
+These behaviors are registered in `Application/DependencyInjection.cs` and apply to all MediatR requests.
 
 ### Result Pattern
 
-The application uses a custom result pattern (`CrudResult<T>`) for consistent API responses:
+The application uses a custom result pattern (`CrudResult<T>`) for consistent API responses. The result pattern is implemented in the `Shared/Models/CustomResult` namespace:
 
 ```csharp
 public class CrudResult<T> : BaseResult
@@ -589,6 +632,8 @@ public class CrudResult<T> : BaseResult
     public List<CrudMessage> Messages { get; set; }
 }
 ```
+
+All result models are located in the `Shared` project to ensure consistency across all layers.
 
 ### Endpoint Groups
 
@@ -620,7 +665,7 @@ The template includes a complete Todo application as an example:
 
 - **TodoLists**: Manage todo lists with colors (value object)
 - **TodoItems**: Manage individual todo items within lists with priorities and reminders
-- **Authorization**: User management and authentication (commands structure ready)
+- **Authentication**: JWT-based authentication with ECDSA keys and cookie management
 
 This demonstrates:
 - Aggregate roots (`TodoList`)
@@ -659,19 +704,23 @@ Entities inheriting from `BaseAuditTableEntity` support soft delete. When an ent
 
 ### Current User Service
 
-The `ICurrentUserService` interface provides access to the current user context:
+The `ICurrentUserService` interface (located in `Shared/Interfaces/`) provides access to the current user context:
 - `UserId`: Current user ID
 - Used by `AuditTableEntityInterceptor` to set audit fields
 
+Implementation is in `Web/Services/CurrentUserService.cs`.
+
 ### JWT Service
 
-The `IJwtService` interface provides JWT token operations:
+The `IJwtService` interface (located in `Shared/Interfaces/Authentication/`) provides JWT token operations:
 - `GenerateToken(int userId)`: Generates a JWT access token using ECDSA (ES256)
 - `ValidateToken(string token)`: Validates and parses a JWT token
 
+Implementation is in `Infrastructure/Services/Authentication/JwtService.cs`.
+
 ### Cookie Service
 
-The `ICookieService` interface provides secure cookie management for tokens:
+The `ICookieService` interface (located in `Shared/Interfaces/Authentication/`) provides secure cookie management for tokens:
 - `SetTokenCookie(string token)`: Sets access token in HTTP-only cookie
 - `GetTokenFromCookie()`: Retrieves access token from cookie
 - `RemoveTokenCookie()`: Removes access token cookie
@@ -684,9 +733,11 @@ All cookies are configured with:
 - `Secure`: Only sent over HTTPS (configurable)
 - `SameSite=Strict`: CSRF protection
 
+Implementation is in `Web/Services/CookieService.cs`.
+
 ### Logging Service
 
-The `ILogService` interface provides structured logging capabilities:
+The `ILogService` interface (located in `Shared/Interfaces/`) provides structured logging capabilities:
 - `DbLog(string message, LogLevel level)`: Writes logs to SQL Server database with automatic context enrichment
 - `ConsoleLog(string message, LogLevel level)`: Writes logs to console
 
@@ -697,6 +748,8 @@ The service automatically captures:
 - User ID (when available)
 
 Logs are stored in the `Logs` table in the `LoggingDb` database. The table is automatically created on first use.
+
+Implementation is in `Infrastructure/Services/LogService.cs`.
 
 ## 🔍 Health Checks
 
@@ -750,14 +803,18 @@ For custom Docker deployment:
 
 1. **Create Domain Entity** in `Domain/{Feature}/`
 2. **Create Domain Events** (if needed) in `Domain/{Feature}/Events/`
-3. **Create Commands** in `Application/{Feature}/Commands/`
-4. **Create Queries** in `Application/{Feature}/Queries/`
-5. **Create Validators** for commands/queries using FluentValidation
-6. **Create Mappings** in `Application/Commons/Mappings/` (if needed)
-7. **Create EF Core Configuration** in `Persistence/Data/Configurations/`
-8. **Create Endpoints** in `Web/Endpoints/{Feature}.cs` (inherit from `EndpointGroupBase`)
-9. **Endpoints are automatically discovered** - no manual registration needed
-10. **Create Unit Tests** following the Feature-Based structure in `tests/`
+3. **Create Feature Folder** in `Application/Features/{Feature}/`
+4. **Create Commands** in `Application/Features/{Feature}/Commands/{CommandName}/`
+   - Each command should be in its own folder with handler and validator
+5. **Create Queries** in `Application/Features/{Feature}/Queries/{QueryName}/`
+   - Each query should be in its own folder with handler, validator, and DTOs
+6. **Create Event Handlers** (if needed) in `Application/Features/{Feature}/EventHandlers/`
+7. **Create Validators** for commands/queries using FluentValidation (in same folder as command/query)
+8. **Create Mappings** in `Application/Common/Mappings/` (if needed)
+9. **Create EF Core Configuration** in `Persistence/Data/Configurations/`
+10. **Create Endpoints** in `Web/Endpoints/{Feature}.cs` (inherit from `EndpointGroupBase`)
+11. **Endpoints are automatically discovered** - no manual registration needed
+12. **Create Unit Tests** following the Feature-Based structure in `tests/`
 
 **Example Endpoint Group:**
 
