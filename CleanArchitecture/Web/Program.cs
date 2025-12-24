@@ -11,8 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
-builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration, builder.Environment);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

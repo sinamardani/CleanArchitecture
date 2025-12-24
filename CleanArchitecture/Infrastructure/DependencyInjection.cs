@@ -1,4 +1,3 @@
-using Application.Common.Interfaces.Data;
 using Shared.Models.AppSettings;
 using Infrastructure.Services;
 using Infrastructure.Services.Authentication;

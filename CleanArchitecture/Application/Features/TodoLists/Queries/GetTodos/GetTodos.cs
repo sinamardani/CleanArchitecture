@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces.Data;
-using Application.Common.Interfaces.Messaging.Command;
+using Application.Common.Interfaces.Messaging.Query;
 using Application.Common.Mappings;
 using Domain.Commons.Enums;
 using Domain.TodoLists;
@@ -7,10 +7,10 @@ using Shared.Models.CustomResult;
 
 namespace Application.Features.TodoLists.Queries.GetTodos;
 
-public record GetTodosQuery : ICommand<TodosVm>;
+public record GetTodosQuery : IQuery<TodosVm>;
 
 public class GetTodosQueryHandler(IApplicationDbContext context)
-    : ICommandHandler<GetTodosQuery, TodosVm>
+    : IQueryHandler<GetTodosQuery, TodosVm>
 {
     public async Task<CrudResult<TodosVm>> Handle(GetTodosQuery request, CancellationToken cancellationToken)
     {
